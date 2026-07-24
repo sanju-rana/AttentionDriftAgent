@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Attention Drift Dashboard
+    </title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet"
+          href="styles.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+
+        <div>
+            <h1>
+                Attention Drift Dashboard
+            </h1>
+
+            <p>
+                Real-time productivity analytics
+            </p>
+        </div>
+
+    </header>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <h3>
+                Focus Score
+            </h3>
+
+            <h1 id="focusScore">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Drift Score
+            </h3>
+
+            <h1 id="driftScore">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Total Events
+            </h3>
+
+            <h1 id="eventCount">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Current State
+            </h3>
+
+            <h1 id="sessionStatus">
+                --
+            </h1>
+
+        </div>
+
+    </div>
+
+    <div class="section-header">
+
+        <h2>
+            Activity Averages
+        </h2>
+
+    </div>
+
+    <div class="stats-grid averages-grid">
+
+        <div class="stat-card">
+
+            <h3>
+                Avg Keystrokes
+            </h3>
+
+            <h1 id="avgKeystrokes">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Avg Clicks
+            </h3>
+
+            <h1 id="avgClicks">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Avg Gaze Score
+            </h3>
+
+            <h1 id="avgGazeScore">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Avg Blink Rate
+            </h3>
+
+            <h1 id="avgBlinkRate">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Reading Time
+            </h3>
+
+            <h1 id="readingRatio">
+                --
+            </h1>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3>
+                Avg Reading Duration
+            </h3>
+
+            <h1 id="avgReadingMinutes">
+                --
+            </h1>
+
+        </div>
+
+    </div>
+
+    <div class="charts-grid">
+
+        <div class="card large-card">
+
+            <div class="card-header trend-header">
+
+                <h2>
+                    Attention Trend
+                </h2>
+
+                <select id="intervalSelect" class="interval-select">
+                    <option value="1">Every 1 min</option>
+                    <option value="5" selected>Every 5 min</option>
+                    <option value="10">Every 10 min</option>
+                    <option value="15">Every 15 min</option>
+                    <option value="30">Every 30 min</option>
+                    <option value="60">Every 1 hr</option>
+                </select>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="trendChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    App Usage
+                </h2>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="appChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="charts-grid">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    Attention vs Drift
+                </h2>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="attentionPieChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h2>
+                    Recent Focus Timeline
+                </h2>
+
+            </div>
+
+            <div id="timeline"
+                 class="timeline">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+
+</html>

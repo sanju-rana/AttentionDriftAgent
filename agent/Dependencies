@@ -1,0 +1,117 @@
+Here's the full, current set of install commands — everything you actually need, nothing extra:
+
+**1. System packages**
+```bash
+sudo apt-get update
+sudo apt-get install -y python3-dev
+```
+
+**2. Python venv + packages**
+```bash
+cd ~/projects/AteentionDriftAgent
+python3 -m venv venv          # skip if venv already exists
+source venv/bin/activate
+pip install requests evdev
+```
+
+**3. Input device permissions (one-time, only if not already done)**
+```bash
+sudo usermod -aG input $USER
+```
+Then log out and log back in (or `newgrp input` for just the current shell).
+
+**4. GNOME Window Calls extension (one-time, only if not already done)**
+```bash
+cd /tmp
+git clone https://github.com/ickyicky/window-calls.git
+mkdir -p ~/.local/share/gnome-shell/extensions/window-calls@domandoman.xyz
+cp /tmp/window-calls/extension.js /tmp/window-calls/metadata.json ~/.local/share/gnome-shell/extensions/window-calls@domandoman.xyz/
+```
+Log out/in, then:
+```bash
+gnome-extensions enable window-calls@domandoman.xyz
+```
+
+**5. Run the agent**
+```bash
+cd ~/projects/AteentionDriftAgent
+source venv/bin/activate
+python3 -m agent.runner
+```
+
+
+For the **agent only**, the commands we discussed are:
+
+### System packages
+
+```bash id="p3q2pq"
+sudo apt update
+
+sudo apt install -y \
+python3 \
+python3-pip \
+python3-venv \
+xdotool \
+wmctrl \
+x11-utils
+```
+
+### Create and activate virtual environment
+
+```bash id="9sntg5"
+cd ~/projects/AteentionDriftAgent
+
+python3 -m venv venv
+
+source venv/bin/activate
+```
+
+### Python dependencies
+
+```bash id="36nhgn"
+pip install requests psutil pynput
+```
+
+Or save them:
+
+```bash id="b3sq4v"
+pip freeze > requirements-agent.txt
+```
+
+### Verify tools
+
+```bash id="2w0tv1"
+xdotool --version
+wmctrl --version
+python3 --version
+```
+
+### Run the agent
+
+```bash id="bq2x73"
+source venv/bin/activate
+
+python3 -m agent.runner
+```
+
+### Optional (for active window debugging)
+
+```bash id="4knd70"
+xdotool getactivewindow
+```
+
+```bash id="6jkp7y"
+xdotool getwindowname $(xdotool getactivewindow)
+```
+
+```bash id="00km0t"
+xprop -id $(xdotool getactivewindow) WM_CLASS
+```
+
+pip install opencv-python mediapipe
+pip install "mediapipe==0.10.14"
+sudo usermod -aG video $USER
+
+
+These are the agent-specific installs and commands; Docker, PostgreSQL, FastAPI, and zip utilities are not required just to run the agent itself.
+

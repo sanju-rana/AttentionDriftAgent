@@ -1,0 +1,5 @@
+API_URL = "http://localhost:8000/events"
+
+COLLECTION_INTERVAL = 5
+
+IDLE_THRESHOLD = 60

@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+
+  api:
+    build: .
+    container_name: attention-api
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./dashboard:/app/dashboard
+      - ./app:/app/app
+
+    depends_on:
+      - postgres
+
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+
+    container_name: attention-postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: attention_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
