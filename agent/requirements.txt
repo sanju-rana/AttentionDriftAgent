@@ -1,12 +1,32 @@
-# Dependencies for the local Attention Drift Agent (runs on your own machine,
-# NOT inside the backend container).
+# =============================================================================
+# Attention Drift Agent Dependencies
+# Installs only the packages required for the desktop monitoring agent.
+# Platform-specific packages are installed automatically by pip.
+# =============================================================================
 
+# HTTP communication with backend
 requests==2.32.3
+
+# Mouse & keyboard monitoring (cross-platform)
 pynput==1.7.7
 
-# --- Active window detection (OS-specific) ---
+# Webcam gaze tracking
+opencv-python==4.10.0.84
+mediapipe==0.10.14
+
+# -----------------------------------------------------------------------------
+# Windows
+# -----------------------------------------------------------------------------
 pywin32==306 ; sys_platform == "win32"
+psutil==6.0.0 ; sys_platform == "win32"
+
+# -----------------------------------------------------------------------------
+# Linux
+# -----------------------------------------------------------------------------
+python-xlib==0.33 ; sys_platform == "linux"
+
+# -----------------------------------------------------------------------------
+# macOS
+# -----------------------------------------------------------------------------
 pyobjc-framework-Quartz==10.3.1 ; sys_platform == "darwin"
 pyobjc-framework-Cocoa==10.3.1 ; sys_platform == "darwin"
-psutil==6.0.0 ; sys_platform == "win32"
-python-xlib==0.33 ; sys_platform == "linux"

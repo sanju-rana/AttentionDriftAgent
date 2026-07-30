@@ -36,11 +36,12 @@ from collections import deque
 
 # ── optional dependencies ─────────────────────────────────────────────────────
 
-try:
-    import Xlib.display  # type: ignore
-    _XLIB_OK = True
-except ImportError:
-    _XLIB_OK = False
+from agent.platform.screen import (
+    get_cursor,
+    get_screen_size,
+)
+
+
 
 cv2 = None
 mp  = None
@@ -333,33 +334,8 @@ class GazeCollector:
         # Cursor history — only the background thread touches this
         self._history: deque[tuple[float, int, int]] = deque()
 
-        self._sw, self._sh = self._get_screen_size()
+        self._sw, self._sh = get_screen_size()
 
-    # ── screen geometry ───────────────────────────────────────────────────────
-
-    @staticmethod
-    def _get_screen_size() -> tuple[int, int]:
-        if _XLIB_OK:
-            try:
-                d  = Xlib.display.Display()
-                sc = d.screen()
-                return sc.width_in_pixels, sc.height_in_pixels
-            except Exception:
-                pass
-        return 1920, 1080
-
-    # ── cursor ────────────────────────────────────────────────────────────────
-
-    @staticmethod
-    def _get_cursor() -> tuple[int, int] | None:
-        if not _XLIB_OK:
-            return None
-        try:
-            d   = Xlib.display.Display()
-            dat = d.screen().root.query_pointer()
-            return dat.root_x, dat.root_y
-        except Exception:
-            return None
 
     # ── cursor-based stability ────────────────────────────────────────────────
 
@@ -384,7 +360,7 @@ class GazeCollector:
 
         while self._running:
             now = time.monotonic()
-            pos = self._get_cursor()
+            pos = get_cursor()
 
             if pos is None:
                 time.sleep(0.25)

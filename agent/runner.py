@@ -117,18 +117,19 @@ import time
 
 from agent.config import COLLECTION_INTERVAL
 
-from agent.collectors.keyboard import KeyboardCollector
-from agent.collectors.mouse import MouseCollector
-from agent.collectors.idle import IdleCollector
-from agent.collectors.window import WindowCollector
+from agent.collectors.factory import (
+    KeyboardCollector,
+    MouseCollector,
+    WindowCollector,
+)
+from agent.collectors.common.gaze import GazeCollector
+from agent.collectors.common.idle import IdleCollector
 
 from agent.scoring.attention_score import AttentionScore
 
 from agent.aggregator.activity_aggregator import ActivityAggregator
 
 from agent.api.client import APIClient
-
-from agent.collectors.gaze import GazeCollector
 
 keyboard = KeyboardCollector()
 mouse = MouseCollector()
