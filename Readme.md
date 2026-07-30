@@ -1,10 +1,13 @@
 # Attention Drift Agent
 
-A self-monitoring focus/attention tracker. A local **agent** watches your own
-keyboard, mouse, active window, and (optionally) webcam-based gaze on your
-machine, computes a focus score, and ships snapshots to a **backend API**
-that stores them and serves a **dashboard** showing your attention trend
-over time.
+A local cross-platform agent watches your own
+keyboard, mouse, active window, and (optionally)
+webcam-based gaze on your machine, computes a focus
+score, and ships snapshots to a backend API that
+stores them and serves a dashboard showing your
+attention trend over time.
+
+The project supports both Windows and Linux.
 
 The project has two independent halves that run separately:
 
@@ -15,74 +18,79 @@ The project has two independent halves that run separately:
 
 ---
 
-# 1. Ubuntu Setup
+## Supported Platforms
 
-## Update packages
+| Platform | Status |
+|----------|--------|
+| Windows | ✅ Supported |
+| Linux | ✅ Supported |
+| macOS | ⚠️ Experimental |
+
+---
+# 1. Local Development Setup
+
+## Ubuntu Setup
+
+### Install Git
 
 ```bash
 sudo apt update
-sudo apt upgrade -y
-```
-
-## Install Git
-
-```bash
 sudo apt install git
 ```
 
-Verify installation:
-
+## Clone Repository
 ```bash
-git --version
+git clone https://github.com/jtanu1654/AttentionDriftAgent.git
+cd AttentionDriftAgent
 ```
 
----
-
-## Install Python Virtual Environment
-
-Ubuntu may not include the `venv` package by default.
-
-For Ubuntu 24.04 / Python 3.12:
-
-```bash
-sudo apt install python3.12-venv
-```
-
-For other Ubuntu versions:
-
-```bash
-sudo apt install python3-venv
-```
-
-Verify:
-
-```bash
-python3 -m venv --help
-```
-
----
-
-## Create Virtual Environment
-
-Navigate to the project directory.
-
+## Create virtual environment
 ```bash
 python3 -m venv .venv
-```
-
-Activate it:
-
-```bash
 source .venv/bin/activate
 ```
 
-You should now see:
-
+## Install backend
+```bash
+pip install -r requirements.txt
 ```
-(.venv)
+
+## Install agent
+```bash
+cd agent
+pip install -r requirements.txt
 ```
 
-at the beginning of your terminal prompt.
+## Windows Setup
+
+### Install Python
+
+Install Python 3.11 or later from:
+
+https://www.python.org/downloads/
+
+During installation enable:
+
+✓ Add Python to PATH
+
+### Clone repository
+
+```bash
+git clone https://github.com/jtanu1654/AttentionDriftAgent.git
+cd AttentionDriftAgent
+```
+
+### Create virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### Activate
+
+```cmd
+.venv\Scripts\activate.bat
+```
 
 Deactivate when finished:
 
@@ -90,9 +98,22 @@ Deactivate when finished:
 deactivate
 ```
 
+### Install backend dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Install agent dependencies
+
+```bash
+cd agent
+pip install -r requirements.txt
+```
+
 ---
 
-## Ubuntu Login Session
+## ## Ubuntu (Linux Only): Login Session
 
 When logging into Ubuntu (especially inside VirtualBox/VMware), select
 
@@ -115,38 +136,78 @@ These components are required by the Attention Drift Agent.
 
 <img width="1600" height="877" alt="image" src="https://github.com/user-attachments/assets/d7d625ac-c288-4d4e-bb51-8b62099ead20" />
 
+---
 
-| Component | What it does | Where it runs |
-|---|---|---|
-| **Backend (`app/`)** | FastAPI service + Postgres DB + dashboard static files | Docker (recommended) |
-| **Agent (`agent/`)** | Reads real input/window/webcam signals on *your* machine and POSTs events to the backend | Directly on your host, in a venv (needs hardware/device access Docker can't easily give it) |
+## Project Structure
+
+```text
+AttentionDriftAgent/
+
+├── app/
+│   ├── api/
+│   ├── models/
+│   ├── repository/
+│   ├── services/
+│   └── main.py
+│
+├── dashboard/
+│
+├── agent/
+│   ├── collectors/
+│   │   ├── common/
+│   │   ├── linux/
+│   │   ├── windows/
+│   │   └── factory.py
+│   │
+│   ├── platform/
+│   │   └── screen.py
+│   │
+│   ├── runner.py
+│   └── requirements.txt
+│
+├── docker-compose.yml
+└── requirements.txt
+```
 
 ---
 
-## 1. Overview
+# 2. Overview
 
 ```
-┌─────────────────┐        POST /events        ┌──────────────────────┐
-│   Agent (host)   │ ──────────────────────────▶️ │   Backend API (api)  │
-│                   │                              │   FastAPI + Postgres │
-│ keyboard/mouse    │                              │                       │
-│ active window     │                              │  scoring, bucketing,  │
-│ webcam gaze/blink │                              │  /dashboard/metrics   │
-└─────────────────┘                              └──────────┬────────────┘
-                                                              │ serves
-                                                              ▼
-                                                   ┌──────────────────────┐
-                                                   │ Dashboard (/ui)       │
-                                                   │ trend chart, app mix, │
-                                                   │ timeline, averages    │
-                                                   └──────────────────────┘
+┌──────────────────────────      POST /events              ┌───────────────────────┐
+│   Cross-platform Agent   │ ─────────────────────────▶️   |   Backend API (api)   │
+│                          |                               │   FastAPI + Postgres  │
+│ keyboard/mouse           |                               │                       │
+│ active window            |                               │  scoring, bucketing,  │
+│ webcam gaze/blink        |                               │  /dashboard/metrics   │
+└──────────────────────────┘                               └──────────┬────────────┘
+                                                                      │ serves
+                                                                      ▼
+                                                            ┌──────────────────────┐
+                                                            │ Dashboard (/ui)       │
+                                                            │ trend chart, app mix, │
+                                                            │ timeline, averages    │
+                                                            └──────────────────────┘
 ```
 
-**Agent collectors** (`agent/collectors/`):
-- `keyboard.py` / `mouse.py` — raw kernel input events via `evdev` (counts only — no keystroke content is captured)
-- `window.py` — active window title/app via `xdotool` / `xprop` (X11)
-- `idle.py` — seconds since the last keyboard/mouse event
-- `gaze.py` — cursor-position heuristic by default; if `USE_WEBCAM_GAZE=true` and `mediapipe`/`opencv` are installed, it switches to real iris-tracking + blink-rate (Eye Aspect Ratio) via your webcam
+**Agent collectors** (`agent/collectors/`)
+
+- `common/`
+  - `gaze.py` – Shared gaze tracking and blink detection
+  - `idle.py` – Tracks user idle time
+
+- `linux/`
+  - `keyboard.py`
+  - `mouse.py`
+  - `window.py`
+
+- `windows/`
+  - `keyboard.py`
+  - `mouse.py`
+  - `window.py`
+
+- `factory.py`
+  - Automatically selects the appropriate collector implementation for the current operating system.
 
 Every `COLLECTION_INTERVAL` seconds (default 5s, `agent/config.py`), the agent
 aggregates a snapshot, computes a local real-time score, and POSTs it to
@@ -157,26 +218,29 @@ buckets recent events into time windows (configurable interval, default 5 min)
 to build the trend line, app-usage breakdown, and summary stats served at
 `GET /dashboard/metrics`.
 
-> **Platform note:** the agent's collectors (`window.py`, `mouse.py`,
-> `keyboard.py`) currently use Linux-only mechanisms (`evdev`, `xdotool`,
-> Xlib). `agent/requirements.txt` lists optional Windows/macOS dependencies
-> (`pywin32`, `pyobjc-*`) but the collector code to use them isn't wired up
-> yet — see [Future Scope](#5-future-scope).
 
 ---
 
-## 2. Running the backend (Docker)
+# 3. Running the backend (Docker)
 
 The backend (FastAPI + Postgres) is the easiest part to run — it's fully
 containerized.
 
 **Prerequisites:** Docker + Docker Compose installed.
-
+ 
+## Linux
 ```bash
 # from the project root
 cp .env.example .env   # then fill in/check values, see below
 docker compose up --build
 ```
+
+## WIndows
+```bash
+copy .env.example .env
+docker compose up --build
+```
+
 
 `.env` (used by `docker-compose.yml` and `app/core/config.py`):
 
@@ -204,13 +268,13 @@ to pick up Python changes: `docker compose restart api`).
 
 ---
 
-## 3. Running the agent (directly on your machine, via venv)
+# 4. Running the agent (directly on your machine, via venv)
 
 The agent needs to read raw input devices and (optionally) your webcam —
 that's awkward to do from inside Docker, so it's meant to run directly on
 your host in its own virtual environment, separate from the backend.
 
-### 3a. System packages (`sudo apt`)
+### 4a. Linux system packages
 
 ```bash
 sudo apt update
@@ -235,8 +299,9 @@ sudo usermod -aG input $USER
 # then log out and back in for the group change to take effect
 ```
 
-### 3b. Python virtual environment
+### 4b. Python virtual environment
 
+#### Linux
 ```bash
 cd agent
 python3 -m venv .venv
@@ -244,15 +309,32 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+#### Windows
+```cmd
+cd agent
+python -m venv .venv
+.venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
 Optional — enable real webcam-based gaze + blink tracking (otherwise it
 falls back to a cursor-position proxy, no webcam needed):
 
+#### Linux
 ```bash
-pip install mediapipe opencv-python
 export USE_WEBCAM_GAZE=true   # default is already true; set to false to disable
 ```
+#### Windows (Command Prompt)
+```bash
+set USE_WEBCAM_GAZE=true  # default is already true; set to false to disable
+```
 
-### 3c. Point it at your backend and run
+#### Windows (PowerShell)
+```bash
+$env:USE_WEBCAM_GAZE="true"   # default is already true; set to false to disable
+```
+
+### 4c. Point it at your backend and run
 
 `agent/api/client.py` posts to `http://localhost:8000/events` and
 `agent/config.py` controls the collection interval — edit these if your
@@ -262,12 +344,15 @@ backend isn't on localhost:8000.
 python -m agent.runner
 ```
 
+The correct collectors are selected automatically
+based on the operating system.
+
 You should see snapshots being collected and POSTed every
 `COLLECTION_INTERVAL` seconds. Press `Ctrl+C` to stop.
 
 ---
 
-## 4. How the score is calculated (and why)
+# 5. How the score is calculated (and why)
 
 There are **two** scoring implementations in this codebase, intentionally:
 
@@ -327,11 +412,11 @@ from real outcomes. That's the main thing the future ML work below is meant
 to fix.
 
 ---
-## 5. Sample Image from Dashboard
+# 6. Sample Image from Dashboard
 <img width="1849" height="950" alt="image" src="https://github.com/user-attachments/assets/9efb753d-822a-45f8-9d20-e854fb8a7578" />
 ---
 
-## 6. Future scope
+# 7. Future scope
 
 The `Filestructure` file in this repo sketches a much larger architecture
 than what's currently implemented — most of it isn't built yet. Notable gaps
@@ -360,9 +445,9 @@ and planned directions:
   continuous score.
 
 **Platform & collection**
-- Wire up the Windows/macOS collector paths that `agent/requirements.txt`
-  already lists dependencies for (`pywin32`, `pyobjc-framework-*`) — right
-  now `window.py`/`mouse.py`/`keyboard.py` are Linux-only.
+- Enhance Windows and Linux collector support with
+additional browser-level telemetry and platform-
+specific optimizations.
 - Browser extension for tab-level URL/title (the schema already has
   `active_url`/`tab_switch` fields that nothing currently populates).
 
